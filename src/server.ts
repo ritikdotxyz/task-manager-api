@@ -1,8 +1,8 @@
 import express from "express";
 import { config } from "dotenv";
 
-import { connectDB } from "./config/db.js";
-import taskRoutes from "./routes/taskRoute.js";
+import { connectDB } from "./config/db.ts";
+import taskRoutes from "./routes/taskRoute.ts";
 
 config();
 connectDB();

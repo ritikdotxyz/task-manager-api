@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Router } from "express";
 
 import {
   addTask,
@@ -6,16 +6,16 @@ import {
   getTaskList,
   updateTask,
   deleteTask,
-} from "../controllers/taskController.js";
+} from "../controllers/taskController.ts";
 
 import {
   addTaskSchema,
   updateTaskSchema,
-} from "../validators/taskValidators.js";
+} from "../validators/taskValidators.ts";
 
-import { validateData } from "../middlewares/validateMiddleware.js";
+import { validateData } from "../middlewares/validateMiddleware.ts";
 
-const route = express.Router();
+const route: Router = express.Router();
 
 route.get("/", getTaskList);
 route.post("/", validateData(addTaskSchema), addTask);
