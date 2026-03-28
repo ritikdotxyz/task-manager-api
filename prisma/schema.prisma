@@ -18,6 +18,8 @@ model User {
   password   String
   name       String
   created_at DateTime @default(now())
+
+  task Task[]
 }
 
 model Task {
@@ -25,6 +27,8 @@ model Task {
   title       String
   description String?
   status taskStatus @default(PENDING)
+  author User @relation(fields: [authorId], references: [id])
+  authorId String
   created_at  DateTime @default(now())
 }
 

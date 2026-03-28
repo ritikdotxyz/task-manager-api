@@ -7,7 +7,8 @@ const addTaskSchema = z.object({
         error: () => ({
             message: "Status must be one of:   PENDING, ON_PROGRESS, COMPLETED"
         })
-    })
+    }),
+    userId: z.string()
 })
 
 const updateTaskSchema = z.object({
@@ -17,7 +18,7 @@ const updateTaskSchema = z.object({
         error: () => ({
             message: "Status must be one of: PENDING, ON_PROGRESS, COMPLETED"
         })
-    }).optional()
+    }).optional(),
 })
 
 export { addTaskSchema, updateTaskSchema };
