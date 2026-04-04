@@ -2,6 +2,9 @@ import { prisma } from "../config/db.ts";
 import type { Task } from "../generated/prisma/client.ts";
 import type { Request, Response } from 'express';
 
+import redis from "../config/redis.ts";
+import { regex } from "zod";
+
 const addTask = async (req: Request, res: Response) => {
   try {
     const { title, description, status } = req.body;
@@ -38,6 +41,13 @@ const getTask = async (req: Request, res: Response) => {
   try {
     const id: string = req.params.id as string;
 
+    const cacheKey = `tasks:${req.user.userId}:${id}`
+    const cached = await redis.get(cacheKey)
+
+    if(cached){
+     return res.status(200).json({ status: "Success", data: JSON.parse(cached) });
+    }
+
     const task: Task | null = await prisma.task.findUnique({
       where: { id: id },
     });
@@ -45,6 +55,8 @@ const getTask = async (req: Request, res: Response) => {
     if (!task) {
       return res.status(400).json({ message: "Task with this ID not found." });
     }
+
+    await redis.set(cacheKey, JSON.stringify(task))
 
     return res.status(200).json({ status: "Success", data: task });
   } catch (error) {
@@ -56,13 +68,26 @@ const getTask = async (req: Request, res: Response) => {
 const getTaskList = async (req: Request, res: Response) => {
   try {
     const page: number = Number(req.query.page) ? Number(req.query.page) : 0;
+
+    const cacheKey = `tasks:${req.user.userId}:${page}`
+
+    const cached = await redis.get(cacheKey)
+    if(cached){
+      return res.status(200).json({ status: "Success", data: JSON.parse(cached), page: page + 1});
+    }
+
     const tasks: Task[] = await prisma.task.findMany({
       skip: page * 5,
       take: 5,
       orderBy: {
        created_at: "desc" 
+      },
+      where:{
+        authorId: req.user.userId
       }
     });
+
+    await redis.set(cacheKey, JSON.stringify(tasks), "EX", 24 * 60 * 60)
     return res.status(200).json({ status: "Success", data: tasks, page: page + 1});
   } catch (error) {
     console.log(error);
