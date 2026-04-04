@@ -8,7 +8,6 @@ const addTaskSchema = z.object({
             message: "Status must be one of:   PENDING, ON_PROGRESS, COMPLETED"
         })
     }),
-    userId: z.string()
 })
 
 const updateTaskSchema = z.object({

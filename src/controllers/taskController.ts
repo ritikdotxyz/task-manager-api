@@ -5,12 +5,14 @@ import type { Request, Response } from 'express';
 const addTask = async (req: Request, res: Response) => {
   try {
     const { title, description, status } = req.body;
+    console.log("User, ", req.user)
 
     const task: Task = await prisma.task.create({
       data: {
         title: title,
         description: description,
         status: status,
+        authorId: req.user.userId
       },
     });
 
@@ -53,8 +55,15 @@ const getTask = async (req: Request, res: Response) => {
 
 const getTaskList = async (req: Request, res: Response) => {
   try {
-    const tasks: Task[] = await prisma.task.findMany();
-    return res.status(200).json({ status: "Success", data: tasks });
+    const page: number = Number(req.query.page) ? Number(req.query.page) : 0;
+    const tasks: Task[] = await prisma.task.findMany({
+      skip: page * 5,
+      take: 5,
+      orderBy: {
+       created_at: "desc" 
+      }
+    });
+    return res.status(200).json({ status: "Success", data: tasks, page: page + 1});
   } catch (error) {
     console.log(error);
     return res.status(400).json({ message: "Unable to fetch tasks." });
