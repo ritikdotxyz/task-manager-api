@@ -5,6 +5,7 @@ import { prisma } from "../config/db.ts"
 import type { User } from "../generated/prisma/client.ts"
 import type { Request, Response } from "express"
 import { generateJWT, generateRefreshToken } from '../utils/generateJWT.ts';
+import { sendEmail } from '../jobs/producer.ts';
 
 const login = async (req: Request, res: Response) => {
     try {
@@ -95,6 +96,9 @@ const register = async (req: Request, res: Response) => {
             sameSite: 'None', secure: true,
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
+
+        sendEmail(user.id)
+
         return res.status(201).json({
             status: "Success",
             data: {

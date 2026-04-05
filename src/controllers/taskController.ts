@@ -3,7 +3,6 @@ import type { Task } from "../generated/prisma/client.ts";
 import type { Request, Response } from 'express';
 
 import redis from "../config/redis.ts";
-import { regex } from "zod";
 
 const addTask = async (req: Request, res: Response) => {
   try {
@@ -56,7 +55,7 @@ const getTask = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Task with this ID not found." });
     }
 
-    await redis.set(cacheKey, JSON.stringify(task))
+    await redis.set(cacheKey, JSON)
 
     return res.status(200).json({ status: "Success", data: task });
   } catch (error) {
